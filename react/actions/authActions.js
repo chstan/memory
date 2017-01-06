@@ -58,7 +58,7 @@ export function authLogoutAndRedirect() {
 export function authLoginUser(username, password, redirect='/app/') {
   return (dispatch) => {
     dispatch(authLoginUserRequest());
-    return fetch(`${SERVER_URL}/api-token-auth/`, {
+    return fetch(`${SERVER_URL}/auth/login/`, {
       method: 'POST',
       body: dataToFormData({
         username,

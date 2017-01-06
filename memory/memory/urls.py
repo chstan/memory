@@ -16,11 +16,12 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.views import generic
-from rest_framework.authtoken.views import obtain_auth_token
+
+import djoser
 
 urlpatterns = [
     url(r'app/', generic.TemplateView.as_view(template_name='app.html')),
     url(r'^admin/', admin.site.urls),
     url(r'^', include('card.urls')),
-    url(r'^api-token-auth/', obtain_auth_token),
+    url(r'^auth/', include('djoser.urls.authtoken')),
 ]
