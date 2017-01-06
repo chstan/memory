@@ -27,5 +27,6 @@ const pureLoginForm = (props) => {
 export default {
   form: reduxForm({
     form: 'login-form',
+    getFormState: (state) => state.get('form').toJS(),
   })(pureLoginForm),
 };

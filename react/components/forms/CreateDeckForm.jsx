@@ -24,5 +24,6 @@ const pureCreateDeckForm = (props) => {
 export default {
   form: reduxForm({
     form: 'create-deck',
+    getFormState: (state) => state.get('form').toJS(),
   })(pureCreateDeckForm),
 };

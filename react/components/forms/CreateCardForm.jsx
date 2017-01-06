@@ -53,5 +53,6 @@ const pureCreateCardForm = (props) => {
 export default {
   form: reduxForm({
     form: 'create-card',
+    getFormState: (state) => state.get('form').toJS(),
   })(pureCreateCardForm),
 };
