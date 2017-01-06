@@ -25,3 +25,5 @@ lib64
 
 static/
 bundles/
+
+*.log
