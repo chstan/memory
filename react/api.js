@@ -127,16 +127,18 @@ class ApiEndpoint {
     return this._detailRoutes[detailName].url;
   }
 
+  _defaultOnSuccess(dispatch, response) {
+    dispatch({
+      type: this.events.actionSuccess,
+      data: response,
+    });
+  }
+
   runFetch(dispatch, getState, queryParams, { method, ...rest }, onSuccess = null,
            detailName = null) {
     const clientOnSuccess = _.get(rest, 'then', x => x);
     if (onSuccess === null) {
-      onSuccess = (response) => {
-        dispatch({
-          type: this.events.actionSuccess,
-          data: response,
-        });
-      };
+      onSuccess = this._defaultOnSuccess.bind(this, dispatch);
     }
     let url = this.getUrlPattern(detailName).stringify(rest.body || queryParams);
     queryParams = this.prepQueryParams(queryParams);
@@ -190,12 +192,39 @@ class CrudEndpoint extends ApiEndpoint {
 
     this._idKeys = config.idKeys || [];
     this._detailRoutes = config.detailRoutes;
+    this._foreignKeys = config.foreignKeys || {};
+
     if (this._detailRoutes) {
       _.map(this._detailRoutes, (spec, name) => {
         spec.url = new UrlPattern(spec.url);
         this[name] = this._createDetailRoute(name, spec);
       });
     }
+  }
+
+  _defaultOnSuccess(dispatch, response) {
+    dispatch({
+      type: this.events.actionSuccess,
+      data: response,
+    });
+
+    // go any inform any related models of the change
+    let wrappedResponse = response;
+    if (!_.isArray(wrappedResponse)) {
+      if (!_.isObject(wrappedResponse)) {
+        return;
+      }
+      wrappedResponse = [wrappedResponse];
+    }
+    _.map(this._foreignKeys, ({ endpoint, reverseName }, keyName) => {
+
+      const payload = _.mapValues(_.groupBy(response, keyName), o => _.map(o, 'id'));
+      dispatch({
+        type: endpoint.events.receiveRelated,
+        payload,
+        reverseName,
+      });
+    });
   }
 
   _createDetailRoute(name, { urlPattern, ...spec }) {
@@ -238,6 +267,17 @@ class CrudEndpoint extends ApiEndpoint {
     }));
   }
 
+  actionReceiveRelated(state, { payload, reverseName }) {
+    let newState = state;
+
+    _.forEach(payload, (relatedIds, id) => {
+      newState = newState.updateIn(['data', String(id), reverseName],
+                                   ids => ids.union(relatedIds));
+    });
+
+    return newState;
+  }
+
   actionDelete(state, action) {
     return state.merge({
       loading: false,
@@ -255,6 +295,7 @@ class CrudEndpoint extends ApiEndpoint {
     // no namespaced name, we could generate a random one, but having the
     // namespaces are useful from an organizational perspective as well
     this.registerAction('delete', this.actionDelete);
+    this.registerAction('receiveRelated', this.actionReceiveRelated);
   }
 
   post(queryParams, rest = {}) {
@@ -319,7 +360,7 @@ class ApiRoot {
 
 const deckEndpoint = new CrudEndpoint({
   url: '/decks/(:id/)',
-  idKeys: ['cards'],
+  idKeys: ['cards'], // make sure to pack these into sets
 });
 const cardEndpoint = new CrudEndpoint({
   url: '/cards/(:id/)',
@@ -327,6 +368,12 @@ const cardEndpoint = new CrudEndpoint({
     assess: {
       url: '/cards/(:id)/assess/',
       method: 'POST',
+    },
+  },
+  foreignKeys: {
+    deck: {
+      endpoint: deckEndpoint,
+      reverseName: 'cards',
     },
   },
 });
