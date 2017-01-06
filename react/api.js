@@ -188,6 +188,7 @@ class CrudEndpoint extends ApiEndpoint {
   constructor(config) {
     super(config);
 
+    this._idKeys = config.idKeys || [];
     this._detailRoutes = config.detailRoutes;
     if (this._detailRoutes) {
       _.map(this._detailRoutes, (spec, name) => {
@@ -219,13 +220,22 @@ class CrudEndpoint extends ApiEndpoint {
       return Immutable.Map({});
     }
 
+    const idKeysToSets = (item) => {
+      let newItem = item;
+      this._idKeys.forEach(idKey => {
+        newItem = newItem.set(idKey, Immutable.Set(newItem.get(idKey)));
+      });
+      return newItem;
+    };
+
     if (_.isArray(data)) {
-      return Immutable.fromJS(_.zipObject(_.map(data, 'id'), data));
+      return Immutable.fromJS(_.zipObject(_.map(data, 'id'), data)).map(
+        idKeysToSets);
     }
 
-    return Immutable.fromJS({
+    return idKeysToSets(Immutable.fromJS({
       [data.id]: data,
-    });
+    }));
   }
 
   actionDelete(state, action) {
@@ -307,7 +317,10 @@ class ApiRoot {
   }
 }
 
-const deckEndpoint = new CrudEndpoint({ url: '/decks/(:id/)' });
+const deckEndpoint = new CrudEndpoint({
+  url: '/decks/(:id/)',
+  idKeys: ['cards'],
+});
 const cardEndpoint = new CrudEndpoint({
   url: '/cards/(:id/)',
   detailRoutes: {
@@ -328,10 +341,6 @@ const api = new ApiRoot({
   me: new ApiEndpoint({
     url: '/users/me/',
   }),
-}, {
-  decks: {
-
-  },
 });
 
 api.init();
