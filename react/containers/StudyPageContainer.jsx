@@ -6,10 +6,10 @@ import { push } from 'react-router-redux';
 import { clearResults } from '../actions/studyActions';
 
 import { fetchCardsForDeckIfNeeded } from '../actions/deckActions';
+import { assessCard } from '../actions/cardActions';
 
 import StudyCard from '../components/StudyCard';
 
-import api from '../api';
 import sel from '../selector';
 
 @connect(state => ({
@@ -31,9 +31,8 @@ export default class StudyPageContainer extends React.Component {
   }
 
   handleAssess = (assessment) => {
-    this.props.dispatch(api.cards.assess(null, {
-      body: { id: this.state.currentCard, assessment },
-    }));
+    this.props.dispatch(assessCard(
+      this.state.currentCard, assessment, this.reset.bind(this)));
   }
 
   attemptToFocusCard(props) {

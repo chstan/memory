@@ -1,6 +1,8 @@
 import api from '../api';
 import { combineReducers } from 'redux-immutable';
 
+import Immutable from 'immutable';
+
 import { SCHEDULE_DECKS } from '../actions/deckActions';
 import { ASSESS_CARD } from '../actions/cardActions';
 
@@ -23,18 +25,32 @@ const spliceBusinessLogic = combineReducers({
   study: studyReducers,
 });
 
-function assessCardReducer(state, { card, value }) {
-  console.log(card);
-  console.log(value);
+function assessCardReducer(state, { card, assessment }) {
+  // the big thing that needs to happen is that we need to update the schedule
+  // for the card
+  let newState = state;
+  const deckId = state.getIn(['cards', 'data', String(card), 'deck']);
+  newState = newState.updateIn(['decks', 'data', String(deckId), 'schedule'], s => {
+    const t = s.filter(cid => cid !== card);
+    if (assessment < 3) {
+      return t.push(card);
+    }
 
-  // TODO implement
-  // there are a few basic things that need to happen, we need to determine whether
-  // to push the card back onto the schedule and adjust the number of due cards,
-  // and we need to clear the scheduled_for field on the card
+    return t;
+  });
+
+  const newSchedule = newState.getIn(['decks', 'data', String(deckId), 'schedule']);
+  newState = newState.setIn(['decks', 'data', String(deckId), 'due_today_count'],
+                            newSchedule.count());
 
   // finally we need to push the assessment onto the recent results for
   // the session
-  return state;
+  newState = newState.updateIn(['study', 'results'], results => results.push(Immutable.Map({
+    card,
+    assessment,
+  })));
+
+  return newState;
 }
 
 function scheduleDecksReducer(state, { deckIds }) {
@@ -55,7 +71,7 @@ function scheduleDecksReducer(state, { deckIds }) {
                       .sortBy(card => moment(card.scheduled_for))
                       .map(card => card.id)
                       .value();
-    newState = newState.setIn(['decks', 'data', String(id), 'schedule'], schedule);
+    newState = newState.setIn(['decks', 'data', String(id), 'schedule'], Immutable.List(schedule));
     newState = newState.setIn(['decks', 'data', String(id), 'due_today_count'], schedule.length);
   });
 

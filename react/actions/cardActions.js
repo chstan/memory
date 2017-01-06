@@ -22,17 +22,20 @@ export function fetchCardsIfNeeded() {
   };
 }
 
-function assessCardAction(card, value) {
+function assessCardAction(card, assessment) {
   return {
     type: ASSESS_CARD,
     card,
-    value,
+    assessment,
   };
 }
 
-export function assessCard(card, value) {
+export function assessCard(card, assessment, then) {
   return (dispatch, getState) => {
-    dispatch(api.cards.assess({}, { id: card, value, }));
-    return dispatch(assessCardAction(card, value));
+    dispatch(assessCardAction(card, assessment));
+    return dispatch(api.cards.assess(null, {
+      body: { id: card, assessment, },
+      then,
+    }));
   }
 }
