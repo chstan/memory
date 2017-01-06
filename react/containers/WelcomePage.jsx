@@ -24,6 +24,21 @@ export default class WelcomePage extends React.Component {
     return (
       <div>
         {welcomeBanner}
+        <div className="section">
+          <h2>Some helpful tips</h2>
+          <p>
+            LaTeX support is available in cards via KaTeX. You can start and
+            end an environment with $$, or with one of \\[ \\( as appropriate.
+          </p>
+          <p>
+            There are also a number of shortcuts available, generally off of the
+            Tab key. Navigation related shortcuts are all prefixed by Tab and
+            are indicated by an underlined letter on links.
+
+            On the study page, you can also use the 0 to 5 keys in order to
+            submit a rating on a card that was just revealed.
+          </p>
+        </div>
       </div>
     );
   }
