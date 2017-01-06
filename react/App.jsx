@@ -18,6 +18,7 @@ import { combineReducers } from 'redux-immutable';
 import Immutable from 'immutable';
 
 import { reducer as reduxFormReducer } from 'redux-form';
+import ReduxToastr, { reducer as toastrReducer } from 'react-redux-toastr';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
 import { Router, IndexRoute, Route, browserHistory } from 'react-router';
@@ -67,6 +68,7 @@ let reducer = combineReducers({
   db: appReducer,
   routing: routerReducer,
   form: threadImmutable(reduxFormReducer),
+  toastr: toastrReducer,
 });
 
 if (process.env.NODE_ENV === 'production') {
@@ -96,20 +98,23 @@ const history = syncHistoryWithStore(browserHistory, store, {
 
 ReactDOM.render(
   <Provider store={store}>
-    <Router history={history}>
-      <Route path="/app/" component={AppContainer}>
-        <IndexRoute component={WelcomePage} />
+    <div>
+      <Router history={history}>
+        <Route path="/app/" component={AppContainer}>
+          <IndexRoute component={WelcomePage} />
 
-        <Route path="decks/add" component={AddDeckPage} />
-        <Route path="decks/deck/:deckId" component={DeckDetailPage} />
-        <Route path="decks/deck/:deckId/add" component={AddCardPage} />
-        <Route path="decks/deck/:deckId/card/:cardId" component={CardDetailPage} />
+          <Route path="decks/add" component={AddDeckPage} />
+          <Route path="decks/deck/:deckId" component={DeckDetailPage} />
+          <Route path="decks/deck/:deckId/add" component={AddCardPage} />
+          <Route path="decks/deck/:deckId/card/:cardId" component={CardDetailPage} />
 
-        <Route path="decks" component={DeckListContainer} />
-        <Route path="decks/deck/:deckId/study" component={StudyPageContainer} />
-        <Route path="statistics" component={StatisticsPage} />
-      </Route>
-    </Router>
+          <Route path="decks" component={DeckListContainer} />
+          <Route path="decks/deck/:deckId/study" component={StudyPageContainer} />
+          <Route path="statistics" component={StatisticsPage} />
+        </Route>
+      </Router>
+      <ReduxToastr position="bottom-right" transitionIn="fadeIn" transitionOut="fadeOut"/>
+    </div>
   </Provider>,
   document.getElementById('app')
 );

@@ -1,7 +1,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { formValueSelector } from 'redux-form';
+import { toastr } from 'react-redux-toastr';
+
+import { formValueSelector, reset } from 'redux-form';
 import _ from 'lodash';
 
 import CreateCardForm from '../components/forms/CreateCardForm';
@@ -25,7 +27,9 @@ export default class AddCardPage extends React.Component {
     this.props.dispatch(api.cards.post({}, {
       body: card,
       then: () => {
+        toastr.success('Card created');
         this.props.dispatch(scheduleDecks(new Set([card.deck])));
+        this.props.dispatch(reset('create-card'));
       },
     }));
   }
