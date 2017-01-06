@@ -5,6 +5,10 @@ import KeyListener from './abstract/KeyListener';
 
 import { Link } from 'react-router';
 
+import auth from '../auth';
+
+import { logout } from '../actions/userActions';
+
 export default class Navbar extends KeyListener {
   goToMain = () => {
     this.props.dispatch(push('/app/'));
@@ -22,7 +26,26 @@ export default class Navbar extends KeyListener {
     this.registerKeyCombination('tab s', this.goToStatistics);
   }
 
+  handleLogout = () => {
+    this.props.dispatch(logout());
+  }
+
   render() {
+    const logoutButton = (
+      <button className="btn btn-default navbar-btn" type="button"
+              onClick={this.handleLogout}>
+        Logout
+      </button>
+    );
+
+    const signupButton = (
+      // use a button here because otherwise the styles are wonky.
+      <button className="btn btn-default navbar-btn" type="button"
+         onClick={() => { this.props.dispatch(push('/app/signup/')); }}>
+        Signup
+      </button>
+    );
+
     return (
       <nav className="navbar navbar-default">
         <div className="container-fluid">
@@ -36,6 +59,11 @@ export default class Navbar extends KeyListener {
               </li>
               <li>
                 <Link to="/app/statistics/"><u>S</u>tatistics</Link>
+              </li>
+            </ul>
+            <ul className="nav navbar-nav navbar-right">
+              <li>
+                { auth.isAuthenticated() ? logoutButton : signupButton }
               </li>
             </ul>
           </div>

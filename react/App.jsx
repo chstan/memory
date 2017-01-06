@@ -28,6 +28,8 @@ import { syncHistoryWithStore,
          routerMiddleware,
          LOCATION_CHANGE } from 'react-router-redux';
 
+import { LOGOUT } from './actions/userActions';
+
 import appReducer from './reducers';
 import deckReducers from './reducers/deckReducers';
 import cardReducers from './reducers/cardReducers';
@@ -36,6 +38,7 @@ import AppContainer from './containers/AppContainer';
 import DeckListContainer from './containers/DeckListContainer';
 import StudyPageContainer from './containers/StudyPageContainer';
 import StatisticsPage from './containers/StatisticsPage';
+import SignupPage from './containers/SignupPage';
 import WelcomePage from './containers/WelcomePage';
 import CardDetailPage from './containers/CardDetailPage';
 import AddCardPage from './containers/AddCardPage';
@@ -66,12 +69,20 @@ const routerReducer = (state = initialRouterState, action) => {
 
 // set up stores and reducers
 let finalCreateStore;
-let reducer = combineReducers({
+const coreReducer = combineReducers({
   db: appReducer,
   routing: routerReducer,
   form: threadImmutable(reduxFormReducer),
   toastr: toastrReducer,
 });
+
+const reducer = (state, action) => {
+  if (action.type === LOGOUT && state) {
+    state = state.delete('db');
+  }
+
+  return coreReducer(state, action);
+}
 
 if (process.env.NODE_ENV === 'production') {
   // prod
@@ -113,6 +124,7 @@ ReactDOM.render(
           <Route path="decks" component={DeckListContainer} />
           <Route path="decks/deck/:deckId/study" component={StudyPageContainer} />
           <Route path="statistics" component={StatisticsPage} />
+          <Route path="signup" component={SignupPage} />
         </Route>
       </Router>
       <ReduxToastr position="bottom-right" transitionIn="fadeIn" transitionOut="fadeOut"/>
