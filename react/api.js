@@ -169,6 +169,7 @@ class ApiEndpoint {
       .then(onSuccess)
       .then(clientOnSuccess)
       .catch((error) => {
+        console.warn(error);
         dispatch({
           type: this.events.actionFail,
           error,
@@ -218,7 +219,7 @@ class CrudEndpoint extends ApiEndpoint {
     }
     _.map(this._foreignKeys, ({ endpoint, reverseName }, keyName) => {
 
-      const payload = _.mapValues(_.groupBy(response, keyName), o => _.map(o, 'id'));
+      const payload = _.mapValues(_.groupBy(wrappedResponse, keyName), o => _.map(o, 'id'));
       dispatch({
         type: endpoint.events.receiveRelated,
         payload,

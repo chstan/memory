@@ -1,8 +1,9 @@
 import React from 'react';
+import KeyListener from './abstract/KeyListener';
 
 import Markdown from './Markdown';
 
-export default class StudyCard extends React.Component {
+export default class StudyCard extends KeyListener {
   constructor(...args) {
     super(...args);
 
@@ -13,7 +14,18 @@ export default class StudyCard extends React.Component {
     };
   }
 
+  componentDidMount() {
+    this.registerKeyCombination('tab h', this.handleReveal);
+    _.range(6).forEach(i => {
+      this.registerKeyCombination(`${i}`, this.handleAssess.bind(this, i));
+    });
+  }
+
   handleAssess = (assessment) => {
+    // block assessment unless you showed the card, this makes
+    // handling key combinations a bit easier
+    if (!this.state.revealed) return;
+
     this.setState({
       assessed: true,
     });
@@ -39,7 +51,7 @@ export default class StudyCard extends React.Component {
     const revealButton = (
       <button type='button'
               className="btn btn-primary" onClick={this.handleReveal}>
-        Show
+        S<u>h</u>ow
       </button>
     );
     const assessButton = value => {
@@ -47,7 +59,7 @@ export default class StudyCard extends React.Component {
         <button disabled={this.state.assessed} key={value}
                 className={`btn ${buttonClasses[value]}`}
                 onClick={this.handleAssess.bind(this, value)}>
-          {value}
+          <u>{value}</u>
         </button>
       );
     };

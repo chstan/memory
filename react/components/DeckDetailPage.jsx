@@ -1,4 +1,7 @@
 import React from 'react';
+import KeyListener from './abstract/KeyListener';
+
+import { push } from 'react-router-redux';
 import { connect } from 'react-redux';
 
 import { Link } from 'react-router';
@@ -14,7 +17,7 @@ import sel from '../selector';
   decks: sel.decks(state),
   cards: sel.cards(state),
 }))
-export default class DeckDetail extends React.Component {
+export default class DeckDetail extends KeyListener {
   get deckId() {
     return this.props.routeParams.deckId;
   }
@@ -30,6 +33,14 @@ export default class DeckDetail extends React.Component {
     }
 
     return deck;
+  }
+
+  goToAddCardPage = () => {
+    this.props.dispatch(push(`/app/decks/deck/${this.deckId}/add`));
+  }
+
+  componentDidMount() {
+    this.registerKeyCombination('tab a', this.goToAddCardPage);
   }
 
   isLoading() {
@@ -69,7 +80,7 @@ export default class DeckDetail extends React.Component {
       <div>
         <h1>{deck.title}</h1>
         <CardList cards={deck.toJS().cards} />
-        <Link className="btn btn-default" role="button" to={`/app/decks/deck/${this.deckId}/add`}>Add a card</Link>
+        <Link className="btn btn-default" role="button" to={`/app/decks/deck/${this.deckId}/add`}><u>A</u>dd a card</Link>
         <button className="btn btn-danger" onClick={this.handleDeleteDeck}>Delete Deck</button>
       </div>
     );

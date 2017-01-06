@@ -5,6 +5,8 @@ import ReactDOM from 'react-dom';
 import md from 'markdown-it';
 import mk from 'markdown-it-katex';
 
+window.listener = new window.keypress.Listener();
+
 window.markdownRenderer = new md();
 window.markdownRenderer.use(mk);
 
