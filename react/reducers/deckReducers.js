@@ -1,11 +1,11 @@
-import { combineReducers } from 'redux';
+import { combineReducers } from 'redux-immutable';
 
 import { SCHEDULE_DECKS } from '../actions/deckActions';
 
-function decks(state = {}, action) {
+import Immutable from 'immutable';
+
+function decks(state = Immutable.Map({}), action) {
   switch (action.type) {
-    case SCHEDULE_DECKS:
-      return state;
     default:
       return state;
   }

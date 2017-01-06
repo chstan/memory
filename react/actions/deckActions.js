@@ -14,7 +14,7 @@ export function scheduleDecks(deckIds) {
 
 function shouldFetchDecks(state) {
   if (!auth.isAuthenticated()) return false;
-  const { data, sync, syncing, } = state.db.decks;
+  const { data, sync, syncing, } = state.getIn(['db', 'decks']).toJS();
   if (syncing) {
     return false;
   } else if (!sync) {
@@ -34,14 +34,14 @@ export function fetchDecksIfNeeded() {
 export function fetchCardsForDeckIfNeeded(deck) {
   return (dispatch, getState) => {
     const state = getState();
-    const cards = state.db.cards.data;
+    const cards = state.getIn(['db', 'cards', 'data']);
 
-    const requiredCards = new Set(deck.cards);
-    const availableCards = new Set(_.map(cards, 'id'));
+    const requiredCards = new Set(deck.toJS().cards);
+    const availableCards = new Set(_.map(cards.toJS(), 'id'));
 
     if (!availableCards.isSuperset(requiredCards)) {
       return dispatch(api.cards.get({ deck: deck.id }, {
-        then: () => dispatch(scheduleDecks(new Set([deck.id]))),
+        then: () => dispatch(scheduleDecks(new Set([deck.get('id')]))),
       }));
     }
   }

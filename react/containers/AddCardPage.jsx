@@ -8,14 +8,16 @@ import CreateCardForm from '../components/forms/CreateCardForm';
 import { scheduleDecks } from '../actions/deckActions';
 
 import api from '../api';
+import sel from '../selector';
 
 const createCardSelector = formValueSelector('create-card'); // a cursor
 
 @connect(state => ({
-  decks: state.db.decks.data,
-  card_type: createCardSelector(state, 'card_type'),
-  front: createCardSelector(state, 'front'),
-  back: createCardSelector(state, 'back'),
+  decks: sel.decks(state),
+  // monitor this, this might not be performant
+  card_type: createCardSelector(state.toJS(), 'card_type'),
+  front: createCardSelector(state.toJS(), 'front'),
+  back: createCardSelector(state.toJS(), 'back'),
 }))
 export default class AddCardPage extends React.Component {
   handleSubmit = (card) => {

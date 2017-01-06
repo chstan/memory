@@ -12,14 +12,18 @@ import {
   createStore,
   compose,
   applyMiddleware,
-  combineReducers,
 } from 'redux';
+
+import { combineReducers } from 'redux-immutable';
+import Immutable from 'immutable';
+
 import { reducer as reduxFormReducer } from 'redux-form';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
 import { Router, IndexRoute, Route, browserHistory } from 'react-router';
-import { syncHistoryWithStore, routerReducer,
-         routerMiddleware } from 'react-router-redux';
+import { syncHistoryWithStore,
+         routerMiddleware,
+         LOCATION_CHANGE } from 'react-router-redux';
 
 import appReducer from './reducers';
 import deckReducers from './reducers/deckReducers';
@@ -40,12 +44,29 @@ import DevTools from './containers/DevTools';
 import api from './api';
 window.api = api;
 
+// have to do a bit of extra work in order to make Immutable work with
+// react-router-redux and redux-form
+const threadImmutable = reducer => (imm, ...args) =>
+  Immutable.fromJS(reducer(imm ? imm.toJS() : {}, ...args));
+
+const initialRouterState = Immutable.fromJS({
+  locationBeforeTransitions: null
+});
+
+const routerReducer = (state = initialRouterState, action) => {
+  if (action.type === LOCATION_CHANGE) {
+    return state.set('locationBeforeTransitions', action.payload);
+  }
+
+  return state;
+};
+
 // set up stores and reducers
 let finalCreateStore;
 let reducer = combineReducers({
   db: appReducer,
   routing: routerReducer,
-  form: reduxFormReducer,
+  form: threadImmutable(reduxFormReducer),
 });
 
 if (process.env.NODE_ENV === 'production') {
@@ -64,9 +85,14 @@ if (process.env.NODE_ENV === 'production') {
   )(createStore);
 }
 
-let store = finalCreateStore(reducer);
+const initialRootState = Immutable.Map();
+let store = finalCreateStore(reducer, initialRootState);
 
-const history = syncHistoryWithStore(browserHistory, store);
+const history = syncHistoryWithStore(browserHistory, store, {
+  selectLocationState (state) {
+    return state.get('routing').toObject();
+  },
+});
 
 ReactDOM.render(
   <Provider store={store}>

@@ -5,6 +5,7 @@ import auth from './auth';
 
 import { checkHttpStatus } from './utils';
 
+import Immutable from 'immutable';
 import qs from 'qs';
 import UrlPattern from 'url-pattern';
 import _ from 'lodash';
@@ -15,12 +16,12 @@ class ApiEndpoint {
     this._path = null;
     this._urlPattern = new UrlPattern(url);
     this._customActions = _.get(config, 'actions', {});
-    this.initialState = {
+    this.initialState = Immutable.fromJS({
       loading: false,
       syncing: false,
       error: null,
       data: {},
-    }
+    });
   }
 
   registerAction(name, method) {
@@ -50,41 +51,37 @@ class ApiEndpoint {
     ]);
   }
 
-  actionFetch(state, action) {
-    return {
-      ...state,
-      loading: true,
-      error: null,
-      syncing: !!action.syncing,
-    };
-  }
-
   normalize(data) {
-    return data;
+    return Immutable.fromJS(data);
   }
 
   mergeData(oldData, newData) {
-    return _.merge(oldData, newData);
+    return oldData.merge(newData);
+  }
+
+  actionFetch(state, action) {
+    return state.merge({
+      loading: true,
+      error: null,
+      syncing: !!action.syncing,
+    });
   }
 
   actionSuccess(state, action) {
-    return {
-      ..._.omit(state, ['data']),
+    return state.merge({
       loading: false,
       sync: true,
       syncing: false,
       error: null,
-      data: this.mergeData(_.clone(state.data), this.normalize(action.data)),
-    };
+    }).updateIn(['data'], data => this.mergeData(data, this.normalize(action.data)));
   }
 
   actionFail(state, action) {
-    return {
-      ...state,
+    return state.merge({
       loading: false,
       error: action.error,
       syncing: false,
-    }
+    });
   }
 
   actionReset(state, action) {
@@ -219,27 +216,25 @@ class CrudEndpoint extends ApiEndpoint {
 
   normalize(data) {
     if (_.isUndefined(data)) {
-      return {};
+      return Immutable.Map({});
     }
 
     if (_.isArray(data)) {
-      return _.zipObject(_.map(data, 'id'), data);
+      return Immutable.fromJS(_.zipObject(_.map(data, 'id'), data));
     }
 
-    return {
+    return Immutable.fromJS({
       [data.id]: data,
-    }
+    });
   }
 
   actionDelete(state, action) {
-    return {
-      ...state,
+    return state.merge({
       loading: false,
       sync: true,
       syncing: false,
       error: null,
-      data: _.filter(state.data, o => o.id !== action.data.id),
-    }
+    }).updateIn(['data'], d => d.filter(o => o.id !== action.data.id));
   }
 
   init(path = '') {

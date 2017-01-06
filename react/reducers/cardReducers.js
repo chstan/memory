@@ -1,6 +1,7 @@
-import { combineReducers } from 'redux';
+import { combineReducers } from 'redux-immutable';
+import Immutable from 'immutable';
 
-function cards(state = {}, action) {
+function cards(state = Immutable.Map({}), action) {
   switch (action.type) {
   default:
     return state;

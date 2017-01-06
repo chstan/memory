@@ -5,7 +5,7 @@ export const ASSESS_CARD = 'ASSESS_CARD';
 
 function shouldFetchCards(state) {
   if (!auth.isAuthenticated()) return false;
-  const { data, sync, syncing, } = state.db.cards;
+  const { data, sync, syncing, } = state.getIn(['db', 'cards']).toJS();
   if (syncing) {
     return false;
   } else if (!sync) {

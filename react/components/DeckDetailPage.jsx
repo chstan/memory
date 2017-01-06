@@ -8,22 +8,25 @@ import { fetchCardsForDeckIfNeeded } from '../actions/deckActions';
 import CardList from './CardList';
 
 import api from '../api';
+import sel from '../selector';
 
 @connect(state => ({
-  decks: state.db.decks.data,
-  cards: state.db.cards.data,
+  decks: sel.decks(state),
+  cards: sel.cards(state),
 }))
 export default class DeckDetail extends React.Component {
   get deckId() {
-    return _.parseInt(this.props.routeParams.deckId);
+    return this.props.routeParams.deckId;
   }
 
   get deck() {
-    const deck = _.cloneDeep(_.find(this.props.decks, d => d.id === this.deckId));
+    let deck = this.props.decks.get(this.deckId);
 
     // attach the cards for the deck
     if (deck) {
-      deck.cards = _.map(deck.cards, id => this.props.cards[id]);
+      deck = deck.updateIn(['cards'], cids => cids.map(cid => {
+        return this.props.cards.get(String(cid));
+      }));
     }
 
     return deck;
@@ -36,8 +39,9 @@ export default class DeckDetail extends React.Component {
     }
 
     // don't return anything yet if we are missing cards for some reason
-    if (_.some(deck.cards, _.isUndefined)) {
-      this.props.dispatch(fetchCardsForDeckIfNeeded(deck));
+    if (_.some(deck.toJS().cards, _.isUndefined)) {
+      this.props.dispatch(fetchCardsForDeckIfNeeded(
+        this.props.decks.get(this.deckId)));
       return true;
     }
 
@@ -64,7 +68,7 @@ export default class DeckDetail extends React.Component {
     return (
       <div>
         <h1>{deck.title}</h1>
-        <CardList cards={deck.cards} />
+        <CardList cards={deck.toJS().cards} />
         <Link className="btn btn-default" role="button" to={`/app/decks/deck/${this.deckId}/add`}>Add a card</Link>
         <button className="btn btn-danger" onClick={this.handleDeleteDeck}>Delete Deck</button>
       </div>

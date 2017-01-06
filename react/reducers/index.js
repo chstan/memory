@@ -1,5 +1,5 @@
 import api from '../api';
-import { combineReducers } from 'redux';
+import { combineReducers } from 'redux-immutable';
 
 import { SCHEDULE_DECKS } from '../actions/deckActions';
 import { ASSESS_CARD } from '../actions/cardActions';
@@ -38,42 +38,28 @@ function assessCardReducer(state, { card, value }) {
 }
 
 function scheduleDecksReducer(state, { deckIds }) {
-  const decks = state.decks.data;
-  const cards = state.cards.data;
-  const updatedDecks = {};
+  let newState = state;
+  const decks = state.getIn(['decks', 'data']).toJS();
+  const cards = state.getIn(['cards', 'data']).toJS();
 
+  const updatedDecks = {};
   const midnight = moment().add(1, 'days').startOf('day');
 
+  // this method isn't too bad if there aren't too many decks to update
+  // would be slow otherwise but we can assess later
   deckIds.forEach(id => {
-    updatedDecks[id] = {
-      schedule: _.chain(decks[id].cards)
-                 .map(cid => cards[cid])
-                 .filter(card => moment(card.scheduled_for).diff(midnight) < 0)
-                 .sortBy(card => moment(card.scheduled_for))
-                 .map(card => card.id)
-                 .value(),
-    };
+    const schedule = _.chain(decks[id].cards)
+                      .map(cid => cards[cid])
+                      .filter(card => moment(
+                        card.scheduled_for).diff(midnight) < 0)
+                      .sortBy(card => moment(card.scheduled_for))
+                      .map(card => card.id)
+                      .value();
+    newState = newState.setIn(['decks', 'data', String(id), 'schedule'], schedule);
+    newState = newState.setIn(['decks', 'data', String(id), 'due_today_count'], schedule.length);
   });
 
-  // now that we have valid schedules, we don't need to trust the old count of
-  // the number of cards due
-  deckIds.forEach(id => {
-    updatedDecks[id].due_today = updatedDecks[id].schedule.length;
-  });
-
-  const updatedState = {
-    decks: {
-      data: updatedDecks,
-    }
-  };
-
-  // this could be more efficient but it's reasonably clean
-  // use immutable Conrad
-  return _.cloneDeep(_.mergeWith(state, updatedState, (o, src) => {
-    if (_.isArray(src)) {
-      return src;
-    }
-  }));
+  return newState;
 }
 
 const dbLevelBusinessLogicReducers = _.fromPairs([

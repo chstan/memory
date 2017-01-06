@@ -5,8 +5,10 @@ import { connect } from 'react-redux';
 
 import DeckLink from '../components/DeckLink';
 
+import sel from '../selector';
+
 @connect(state => ({
-  decks: state.db.decks.data,
+  decks: sel.decks(state),
 }))
 export default class DeckListContainer extends React.Component {
   handleClick() {
@@ -15,7 +17,7 @@ export default class DeckListContainer extends React.Component {
   }
 
   decks() {
-    return _.values(this.props.decks);
+    return _.values(this.props.decks.toJS());
   }
 
   render() {

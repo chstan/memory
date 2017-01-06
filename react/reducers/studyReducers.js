@@ -1,14 +1,13 @@
 import CLEAR_RESULTS from '../actions/studyActions';
 
-export default function (state = {
+import Immutable from 'immutable';
+
+export default function (state = Immutable.fromJS({
   results: [],
-}, action) {
+}), action) {
   switch (action.type) {
     case CLEAR_RESULTS:
-      return {
-        ...state,
-        results: [],
-      };
+      return state.set('schedule', Immutable.fromJS([]));
     default:
       return state;
   };

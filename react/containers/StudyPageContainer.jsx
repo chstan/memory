@@ -10,11 +10,12 @@ import { fetchCardsForDeckIfNeeded } from '../actions/deckActions';
 import StudyCard from '../components/StudyCard';
 
 import api from '../api';
+import sel from '../selector';
 
 @connect(state => ({
-  decks: state.db.decks.data,
-  cards: state.db.cards.data,
-  results: state.db.results,
+  decks: sel.decks(state),
+  cards: sel.cards(state),
+  study: sel.study(state),
 }))
 export default class StudyPageContainer extends React.Component {
   // DRY, this currently has a lot of code duplicated across the Deck pages
@@ -35,16 +36,17 @@ export default class StudyPageContainer extends React.Component {
     }));
   }
 
-  attemptToFocusCard() {
+  attemptToFocusCard(props) {
     // only try to focus a card if it is necessary
     if (this.state.currentCard === null) {
-      const deck = this.deck;
+      const deck = props.decks.get(props.routeParams.deckId);
       if (!deck) {
         return;
       }
 
       try {
-        const schedule = deck.schedule;
+        const schedule = deck.toJS().schedule;
+
         if (!_.isArray(schedule)) {
           return;
         }
@@ -70,34 +72,35 @@ export default class StudyPageContainer extends React.Component {
       currentCard: null,
     });
 
-    this.attemptToFocusCard();
+    this.attemptToFocusCard(this.props);
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.deckId !== _.parseInt(nextProps.routeParams.deckId) &&
+    if (this.deckId !== nextProps.routeParams.deckId &&
         _.isNumber(_.parseInt(nextProps.routeParams.deckId))) {
           this.reset();
     } else {
-      this.attemptToFocusCard();
+      this.attemptToFocusCard(nextProps);
     }
   }
 
   componentDidMount() {
     this.props.dispatch(clearResults());
-    this.attemptToFocusCard();
+    this.attemptToFocusCard(this.props);
   }
 
-
   get deckId() {
-    return _.parseInt(this.props.routeParams.deckId);
+    return this.props.routeParams.deckId;
   }
 
   get deck() {
-    const deck = _.cloneDeep(this.props.decks[this.deckId]);
+    let deck = this.props.decks.get(this.deckId);
 
     // attach the cards for the deck
     if (deck) {
-      deck.cards = _.map(deck.cards, id => this.props.cards[id]);
+      deck = deck.updateIn(['cards'], cids => cids.map(cid => {
+        return this.props.cards.get(String(cid));
+      }));
     }
 
     return deck;
@@ -108,7 +111,7 @@ export default class StudyPageContainer extends React.Component {
       return;
     }
 
-    return this.props.cards[this.state.currentCard];
+    return this.props.cards.get(String(this.state.currentCard));
   }
 
   isLoading() {
@@ -118,9 +121,10 @@ export default class StudyPageContainer extends React.Component {
     }
 
     // don't return anything yet if we are missing cards for some reason
-    if (_.some(deck.cards, _.isUndefined)) {
+    if (_.some(deck.toJS().cards, _.isUndefined)) {
       // request cards for deck if necessary
-      this.props.dispatch(fetchCardsForDeckIfNeeded(deck));
+      this.props.dispatch(fetchCardsForDeckIfNeeded(
+        this.props.decks.get(this.deckId)));
       return true;
     }
 
@@ -155,8 +159,8 @@ export default class StudyPageContainer extends React.Component {
       <div className="container">
         <div className="row">
           <div className="col-sm-12">
-            Studying {deck.title} on card {card.id}
-            <StudyCard card={this.card} onAssess={this.handleAssess} />
+            Studying {deck.get('title')} on card {card.get('id')}
+            <StudyCard card={this.card.toJS()} onAssess={this.handleAssess} />
           </div>
         </div>
       </div>

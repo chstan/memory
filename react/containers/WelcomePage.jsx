@@ -5,8 +5,10 @@ import { connect } from 'react-redux';
 import LoginForm from '../components/forms/LoginForm';
 import { authLoginUser } from '../actions/authActions';
 
+import sel from '../selector';
+
 @connect(state => ({
-  me: state.db.me.data,
+  me: sel.me(state),
 }))
 export default class WelcomePage extends React.Component {
   handleSubmit = (data) => {
@@ -15,8 +17,8 @@ export default class WelcomePage extends React.Component {
 
   render() {
     let welcomeBanner = <LoginForm.form onSubmit={this.handleSubmit} />;
-    if (_.get(this.props.me, 'email')) {
-      welcomeBanner = <p>Welcome { this.props.me.email }!</p>;
+    if (this.props.me.get('email')) {
+      welcomeBanner = <p>Welcome { this.props.me.get('email') }!</p>;
     }
 
     return (

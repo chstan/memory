@@ -3,9 +3,11 @@ import { connect } from 'react-redux';
 
 import _ from 'lodash';
 
+import sel from '../selector';
+
 @connect(state => ({
-  decks: state.db.decks.data,
-  cards: state.db.cards.data,
+  decks: sel.decks(state),
+  cards: sel.cards(state),
 }))
 export default class CardDetailPage extends React.Component {
   render() {
