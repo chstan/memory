@@ -49,7 +49,7 @@ export default class DeckDetail extends React.Component {
   }
 
   handleDeleteDeck = () => {
-    this.props.dispatch(api.decks.delete(this.deck));
+    this.props.dispatch(api.decks.delete(this.deck.toJS()));
   }
 
   renderLoading() {
