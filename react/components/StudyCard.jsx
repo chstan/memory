@@ -64,7 +64,7 @@ export default class StudyCard extends KeyListener {
       );
     };
     const assessCardPanel = (
-      <div>
+      <div className="btn-group">
         {_.map(_.range(6), assessButton)}
       </div>
     );
