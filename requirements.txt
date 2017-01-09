@@ -3,5 +3,10 @@ djangorestframework
 markdown
 django-filter
 django-webpack-loader
-Fabric
 djoser
+
+# DB
+psycopg2
+
+# WSGI
+uwsgi

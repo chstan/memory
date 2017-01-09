@@ -1,0 +1,30 @@
+---
+- name: Provision a database server
+  hosts: dbservers
+  become: yes
+  become_user: root
+  remote_user: "{{ ansible_user }}"
+  vars:
+    - update_apt_cache: yes
+  vars_files:
+    - env_vars/base.yml
+    - env_vars/{{ env }}.yml
+  roles:
+    - role: ANXS.postgresql
+      postgresql_version: 9.3
+      postgresql_encoding: 'UTF-8'
+      postgresql_locale: 'en_US.UTF-8'
+      postgresql_admin_user: 'postgres'
+
+      postgresql_databases:
+        - name: "{{ application_name }}"
+
+      postgresql_users:
+        - name: "{{ application_name }}"
+          pass: "{{ db_password }}"
+
+      postgresql_user_privileges:
+        - name: "{{ application_name }}"
+          db: "{{ application_name }}"
+          priv: "ALL"
+          role_attr_flags: "CREATEDB"

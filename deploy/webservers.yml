@@ -1,0 +1,36 @@
+---
+- name: Provision a webserver
+  hosts: webservers
+  become: yes
+  become_user: root
+  remote_user: "{{ ansible_user }}"
+  vars:
+    - update_apt_cache: yes
+  vars_files:
+    - env_vars/base.yml
+    - env_vars/{{ env }}.yml
+  roles:
+    - base
+    - role: thefinn93.letsencrypt
+      letsencrypt_webroot_path: /var/www/html
+      letsencrypt_email: "{{ admin_email }}"
+      letsencrypt_cert_domains:
+        - "{{ domain }}"
+        - www.{{ domain }}
+      letsencrypt_renewal_command_arg: '--renew-hook "service restart nginx"'
+    - role: jdauphant.nginx
+      become: yes
+      nginx_configs:
+        ssl:
+          - ssl_certificate_key /etc/letsencrypt/live/{{ domain }}
+          - ssl_certificate /etc/letsencrypt/live/{{ domain }}
+      nginx_sites:
+        memory:
+          - listen 443 ssl
+          - server_name {{ domain }}
+          - set $myhost {{ domain }}
+          - root /home/chstansbury/deploy/memory/
+          - |
+            location / {
+              proxy_pass http://127.0.0.1:{{ port }}/;
+            }

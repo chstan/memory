@@ -1,0 +1,10 @@
+---
+project_repo: https://github.com/chstan/memory.git
+
+project_name: memory
+application_name: memory
+
+db_user: "{{ application_name }}"
+db_name: "{{ application_name }}"
+
+ansible_user: chstansbury

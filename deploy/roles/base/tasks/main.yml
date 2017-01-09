@@ -1,0 +1,79 @@
+#---
+#- name: Create project directory
+#  file:
+#    path: "{{ project_root }}"
+#    state: directory
+#
+#- name: Checkout code
+#  git:
+#    repo: "{{ project_repo }}"
+#    dest: "{{ project_root }}"
+#    accept_hostkey: True
+#
+#- name: Template production settings file
+#  template:
+#    src: templates/production_settings.py.j2
+#    dest: "{{ project_root }}/{{ project_name }}/{{ application_name }}/production_settings.py"
+#    # this is default but want to make it clear that this is destructive
+#    force: yes
+#
+#- name: Template production wsgi file
+#  template:
+#    src: templates/production_wsgi.py.j2
+#    dest: "{{ project_root }}/{{ project_name }}/{{ application_name }}/production_wsgi.py"
+#    # this is default but want to make it clear that this is destructive
+#    force: yes
+#
+#- name: Template uWSGI ini file
+#  template:
+#    src: templates/uwsgi.ini.j2
+#    dest: "{{ project_root }}/uwsgi.ini"
+#
+#- name: Create virtualenv
+#  pip:
+#    virtualenv: "{{ project_root}}/env"
+#    requirements: requirements.txt
+#    virtualenv_python: python3.4
+#    chdir: "{{ project_root }}"
+#
+#- name: Install requirements
+#  shell: "{{ project_root }}/env/bin/pip3 install -r requirements.txt"
+#  args:
+#    chdir: "{{ project_root }}"
+
+- name: Run migrations
+  django_manage:
+    app_path: "{{ project_root }}/{{ project_name }}"
+    command: migrate
+    virtualenv: "../env"
+    settings: "{{ project_name }}.production_settings"
+
+#- name: Run migrations
+#  shell: "{{ project_root }}/env/bin/python manage.py migrate --settings
+
+- name: Ensure npm present
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - nodejs
+    - npm
+
+- name: Make sure node_modules exists
+  file:
+    path: "{{ project_root }}/{{ project_name }}/node_modules"
+    state: directory
+
+- name: Run npm install
+  npm:
+    path: "{{ project_root }}/{{ project_name }}"
+
+- name: Run webpack
+  shell: webpack --config webpack.prod.config.js
+  args:
+    chdir: "{{ project_root }}/{{ project_name }}"
+
+- name: Run application via uWSGI
+  shell: uwsgi --ini uwsgi.ini
+  args:
+    chdir: "{{ project_root }}/{{ project_name }}"

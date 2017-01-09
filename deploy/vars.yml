@@ -1,0 +1,12 @@
+project_name: memory
+
+project_repo: git@github.com:chstan/memory.git
+ssh_private_key: ~/.ssh/id_rsa
+
+system_packages:
+  - git
+  - nginx
+  - python-pip
+  - python-dev
+  - postgresql
+  - python-psycopg2

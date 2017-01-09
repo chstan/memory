@@ -1,0 +1,11 @@
+chdir={{ project_root }}/{{ project_name }}
+module={{ project_name }}.production_wsgi:application
+master=True
+pidfile=/temp/{{ project_name }}-master.pid
+vacuum=True
+max-requests=10000
+daemonize=/var/log/uwsgi/{{ project_name }}.log
+harakiri=8
+home=env
+processes=2
+http={{ port }}

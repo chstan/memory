@@ -27,3 +27,13 @@ static/
 bundles/
 
 *.log
+
+# Created by ansible templates
+production_settings.py
+uwsgi.ini
+
+# SECRETS
+production.yml
+
+# Ansible generated
+*.retry 
