@@ -5,11 +5,11 @@ var BundleTracker = require('webpack-bundle-tracker');
 var config = require('./webpack.base.config.js');
 
 config.output.path = path.resolve('./memory/static/bundles/prod/');
+config.bail = true;
 
 config.plugins = config.plugins.concat([
   new BundleTracker({filename: './webpack-stats-prod.json'}),
-
-  new webpack.optimize.DedupePlugin(),
+  new webpack.NoErrorsPlugin(),
   new webpack.DefinePlugin({
     'process.env': {
       'NODE_ENV': JSON.stringify('production'),
