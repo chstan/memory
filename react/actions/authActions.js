@@ -1,6 +1,5 @@
 import fetch from 'isomorphic-fetch';
 import { push } from 'react-router-redux';
-import { SERVER_URL } from '../utils/config';
 import { checkHttpStatus, dataToFormData } from '../utils';
 
 import { fetchProfileIfNeeded } from './userActions';
@@ -85,7 +84,7 @@ export function authLogoutAndRedirect() {
 export function authLoginUser(username, password, redirect='/app/') {
   return (dispatch) => {
     dispatch(authLoginUserRequest());
-    return fetch(`${SERVER_URL}/auth/login/`, {
+    return fetch(`/auth/login/`, {
       method: 'POST',
       body: dataToFormData({
         username,
@@ -108,7 +107,7 @@ export function authLoginUser(username, password, redirect='/app/') {
 export function authSignupUser({ email, password, username }, redirect='/app/') {
   return (dispatch) => {
     dispatch(authSignupUserRequest());
-    return fetch(`${SERVER_URL}/auth/register/`, {
+    return fetch(`/auth/register/`, {
       method: 'POST',
       body: dataToFormData({
         email, password, username,
