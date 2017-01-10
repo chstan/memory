@@ -17,10 +17,10 @@ config.plugins = config.plugins.concat([
   new webpack.optimize.OccurenceOrderPlugin(),
   new webpack.optimize.UglifyJsPlugin({
     compress: {
-      warnings: false
-      mangle: false,
-    }
-  })
+      warnings: false,
+    },
+    mangle: false,
+  }),
 ])
 
 config.module.loaders.push(
