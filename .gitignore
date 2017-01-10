@@ -30,6 +30,7 @@ bundles/
 
 # Created by ansible templates
 production_settings.py
+production_wsgi.py
 uwsgi.ini
 
 # SECRETS
