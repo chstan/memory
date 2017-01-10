@@ -8,7 +8,6 @@ module.exports = {
   entry: {
     // Add as many entry points as you have container-react-components here
     app: './react/App',
-    vendors: ['react'],
   },
 
   output: {
@@ -20,7 +19,7 @@ module.exports = {
   ], // add all vendor libs
 
   plugins: [
-    new webpack.optimize.CommonsChunkPlugin('vendors', 'vendors.js', Infinity),
+    // new webpack.optimize.CommonsChunkPlugin('vendors', 'vendors.js', Infinity),
   ], // add all common plugins here
 
   module: {
