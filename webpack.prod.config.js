@@ -1,8 +1,8 @@
 var path = require('path');
-var webpack = require('webpack')
-var BundleTracker = require('webpack-bundle-tracker')
+var webpack = require('webpack');
+var BundleTracker = require('webpack-bundle-tracker');
 
-var config = require('./webpack.base.config.js')
+var config = require('./webpack.base.config.js');
 
 config.output.path = path.resolve('./memory/static/bundles/prod/');
 
@@ -21,10 +21,10 @@ config.plugins = config.plugins.concat([
     },
     mangle: false,
   }),
-])
+]);
 
-config.module.loaders.push(
-  { test: /\.jsx?$/, exclude: /node_modules/, loader: 'babel' }
-)
+config.module.loaders.push({
+  test: /\.jsx?$/, exclude: /node_modules/, loader: 'babel',
+});
 
-module.exports = config
+module.exports = config;

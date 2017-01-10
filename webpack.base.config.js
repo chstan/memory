@@ -20,7 +20,7 @@ module.exports = {
   ], // add all vendor libs
 
   plugins: [
-    new webpack.optimize.CommonsChunkPlugin('vendors', 'vendors.js'),
+    new webpack.optimize.CommonsChunkPlugin('vendors', 'vendors.js', Infinity),
   ], // add all common plugins here
 
   module: {
