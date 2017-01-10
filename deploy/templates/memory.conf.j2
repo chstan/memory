@@ -1,0 +1,31 @@
+# {{ ansible_managed }}
+server {
+    listen       80;
+    server_name  {{ domain }};
+    return 301 https://{{ domain }}$request_uri;
+}
+
+
+# HTTPS server
+server {
+    ssl          on;
+    listen       443;
+    server_name  memory.conradstansbury.com;
+
+    ssl_certificate /etc/letsencrypt/live/{{ domain }}/cert.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ domain }}/privkey.pem;
+
+    location /static/ {    
+            autoindex on;    
+            root {{ project_root }};
+    }
+
+    location / {
+             proxy_pass http://localhost:{{ port }}/;
+             proxy_redirect off;
+             proxy_set_header Host $http_host;
+             proxy_set_header X-Real-IP $remote_addr;
+             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+             proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

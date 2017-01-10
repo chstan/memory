@@ -16,21 +16,13 @@
       letsencrypt_email: "{{ admin_email }}"
       letsencrypt_cert_domains:
         - "{{ domain }}"
-        - www.{{ domain }}
       letsencrypt_renewal_command_arg: '--renew-hook "service restart nginx"'
     - role: jdauphant.nginx
       become: yes
       nginx_configs:
         ssl:
-          - ssl_certificate_key /etc/letsencrypt/live/{{ domain }}
-          - ssl_certificate /etc/letsencrypt/live/{{ domain }}
+          - ssl_certificate_key /etc/letsencrypt/live/{{ domain }}/privkey.pem
+          - ssl_certificate /etc/letsencrypt/live/{{ domain }}/cert.pem
       nginx_sites:
         memory:
-          - listen 443 ssl
-          - server_name {{ domain }}
-          - set $myhost {{ domain }}
-          - root /home/chstansbury/deploy/memory/
-          - |
-            location / {
-              proxy_pass http://127.0.0.1:{{ port }}/;
-            }
+          template: templates/memory.conf.j2

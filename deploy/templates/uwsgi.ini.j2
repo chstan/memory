@@ -1,11 +1,14 @@
+[uwsgi]
 chdir={{ project_root }}/{{ project_name }}
 module={{ project_name }}.production_wsgi:application
+virtualenv = {{ project_root }}/env
 master=True
-pidfile=/temp/{{ project_name }}-master.pid
+pidfile=/tmp/{{ project_name }}-master.pid
 vacuum=True
 max-requests=10000
 daemonize=/var/log/uwsgi/{{ project_name }}.log
 harakiri=8
-home=env
+home=../env
+pythonpath=..
 processes=2
-http={{ port }}
+http=:{{ port }}
