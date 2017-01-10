@@ -4,7 +4,12 @@ var BundleTracker = require('webpack-bundle-tracker')
 
 module.exports = {
   context: __dirname,
-
+  resolveLoader: {
+    root: path.resolve(__dirname, 'node_modules'),
+    modulesDirectories: [
+      path.resolve(__dirname, 'node_modules'),
+    ],
+  },
   entry: {
     // Add as many entry points as you have container-react-components here
     app: './react/App',
@@ -29,7 +34,7 @@ module.exports = {
   },
 
   resolve: {
-    modulesDirectories: ['node_modules', 'bower_components'],
+    modulesDirectories: ['node_modules'],
     extensions: ['', '.js', '.jsx']
   },
 }

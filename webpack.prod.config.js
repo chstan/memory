@@ -9,18 +9,13 @@ config.output.path = path.resolve('./memory/static/bundles/prod/');
 config.plugins = config.plugins.concat([
   new BundleTracker({filename: './webpack-stats-prod.json'}),
 
+  new webpack.optimize.DedupePlugin(),
   new webpack.DefinePlugin({
     'process.env': {
       'NODE_ENV': JSON.stringify('production'),
-    }}),
-
-  new webpack.optimize.OccurenceOrderPlugin(),
-  new webpack.optimize.UglifyJsPlugin({
-    compress: {
-      warnings: false,
     },
-    mangle: false,
   }),
+  new webpack.optimize.UglifyJsPlugin(),
 ]);
 
 config.module.loaders.push({
