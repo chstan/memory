@@ -48,13 +48,6 @@
     virtualenv: "../env"
     settings: "{{ project_name }}.production_settings"
 
-- name: Run collectstatic
-  django_manage:
-    app_path: "{{ project_root }}/{{ project_name }}"
-    command: collectstatic
-    virtualenv: "../env"
-    settings: "{{ project_name }}.production_settings"
-
 - name: Ensure npm present
   apt:
     name: "{{ item }}"
@@ -77,6 +70,13 @@
   shell: "nodejs {{ project_root }}/node_modules/.bin/webpack --config webpack.prod.config.js"
   args:
     chdir: "{{ project_root }}"
+
+- name: Run collectstatic
+  django_manage:
+    app_path: "{{ project_root }}/{{ project_name }}"
+    command: collectstatic
+    virtualenv: "../env"
+    settings: "{{ project_name }}.production_settings"
 
 - name: Ensure log file directory exists
   file:
