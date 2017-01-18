@@ -44,8 +44,6 @@ class DeckViewSet(viewsets.ModelViewSet):
         serializer.save(owner=self.request.user)
 
 
-
-
 class CardViewSet(viewsets.ModelViewSet):
     queryset = Card.objects.all()
     serializer_class = CardSerializer
@@ -53,7 +51,7 @@ class CardViewSet(viewsets.ModelViewSet):
     permissions_classes = (permissions.IsAuthenticated, UserIsOwnerPermission,)
 
     def get_queryset(self):
-        return super(DeckViewSet, self).get_queryset().filter(
+        return super(CardViewSet, self).get_queryset().filter(
             owner=self.request.user)
 
     def perform_create(self, serializer):
