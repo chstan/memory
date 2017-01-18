@@ -3,6 +3,7 @@ from django.contrib.auth.models import User, Group
 from django.http import HttpResponseBadRequest
 
 from .models import Deck, Card
+from .permissions import UserIsOwnerPermission
 
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import detail_route, list_route
@@ -25,13 +26,42 @@ class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
+
 class DeckViewSet(viewsets.ModelViewSet):
     queryset = Deck.objects.all()
     serializer_class = DeckSerializer
 
+    permissions_classes = (permissions.IsAuthenticated, UserIsOwnerPermission,)
+
+    def get_queryset(self):
+        return super(DeckViewSet, self).get_queryset().filter(
+            owner=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(owner=self.request.user)
+
+
+
+
 class CardViewSet(viewsets.ModelViewSet):
     queryset = Card.objects.all()
     serializer_class = CardSerializer
+
+    permissions_classes = (permissions.IsAuthenticated, UserIsOwnerPermission,)
+
+    def get_queryset(self):
+        return super(DeckViewSet, self).get_queryset().filter(
+            owner=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(owner=self.request.user)
+
 
     @detail_route(methods=['POST'], permission_classes=[permissions.IsAuthenticated])
     def assess(self, request, pk=None, *args, **kwargs):

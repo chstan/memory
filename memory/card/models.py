@@ -1,5 +1,7 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
+
 from datetime import timedelta
 
 from card.spaced_repetition import new_easiness, new_interval
@@ -11,6 +13,7 @@ class Deck(models.Model):
     Represents a collection of cards
     """
 
+    owner = models.ForeignKey(User, blank=False, related_name='decks')
     title = models.CharField(
         max_length=50, blank=False,
         help_text="Label for the deck indicating the type of content contained inside")
@@ -42,6 +45,7 @@ class Card(models.Model):
     back = models.TextField(blank=True)
 
     deck = models.ForeignKey(Deck, blank=False, related_name='cards')
+    owner = models.ForeignKey(User, blank=False, related_name='cards')
 
     # Fields related to the spaced repetition algorithm
     easiness = models.FloatField(default=consts.MAX_EASINESS)
