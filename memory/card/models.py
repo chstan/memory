@@ -8,12 +8,13 @@ from card.spaced_repetition import new_easiness, new_interval
 
 import card.constants as consts
 
+
 class Deck(models.Model):
     """
     Represents a collection of cards
     """
 
-    owner = models.ForeignKey(User, blank=False, related_name='decks')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, blank=False, related_name='decks')
     title = models.CharField(
         max_length=50, blank=False,
         help_text="Label for the deck indicating the type of content contained inside")
@@ -35,6 +36,7 @@ class Card(models.Model):
         (ONE_SIDED_TYPE, 'One sided'),
         ('t', 'Two sided (learn front to back and back to front)'),
         ('d', 'Derivation'),
+        ('k', 'Kata'),
     )
 
     card_type = models.CharField(
@@ -44,8 +46,8 @@ class Card(models.Model):
     front = models.TextField(blank=False)
     back = models.TextField(blank=True)
 
-    deck = models.ForeignKey(Deck, blank=False, related_name='cards')
-    owner = models.ForeignKey(User, blank=False, related_name='cards')
+    deck = models.ForeignKey(Deck, on_delete=models.CASCADE, blank=False, related_name='cards')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, blank=False, related_name='cards')
 
     # Fields related to the spaced repetition algorithm
     easiness = models.FloatField(default=consts.MAX_EASINESS)
@@ -78,4 +80,4 @@ class Card(models.Model):
 class DerivationStep(models.Model):
     content = models.TextField(blank=True)
 
-    card = models.ForeignKey(Card, blank=False, related_name='derivation_steps')
+    card = models.ForeignKey(Card, on_delete=models.CASCADE, blank=False, related_name='derivation_steps')
