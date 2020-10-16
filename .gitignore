@@ -2,6 +2,8 @@
 .idea/
 
 front/src/components/prosemirror/math_node/
+fixtures/
+back/dev.db
 
 **/sandbox_app/instance/
 
