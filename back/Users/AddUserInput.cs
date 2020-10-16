@@ -2,9 +2,9 @@ using back.Data;
 
 namespace back.Users
 {
-    public class CreateUserPayload 
+    public class AddUserPayload 
     {
-        public CreateUserPayload(User user, string? clientMutationId)
+        public AddUserPayload(User user, string? clientMutationId)
         {
             User = user;
             ClientMutationId = clientMutationId;
@@ -13,9 +13,9 @@ namespace back.Users
         public User User { get; }
         public string? ClientMutationId { get; }
     }
-    public class CreateUserInput 
+    public class AddUserInput 
     {
-        public CreateUserInput(string name, string email, string password, string? clientMutationId)
+        public AddUserInput(string name, string email, string password, string? clientMutationId)
         {
             Name = name;
             Email = email;

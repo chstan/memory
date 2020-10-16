@@ -2,12 +2,12 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using HotChocolate;
 
+#nullable disable
 
 namespace back.Data
 {
     public class UserSettings
     {
-        [Key]
         public int Id { get; set; }
         public User User { get; set; }
 

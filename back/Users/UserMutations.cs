@@ -1,18 +1,13 @@
-//https://github.com/ChilliCream/hotchocolate-examples/blob/master/workshop/src/Server/PureCodeFirst%2BEF/Users/UserMutations.cs
 using System;
-using System.Text;
 
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 
-using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using HotChocolate;
 using HotChocolate.Execution;
-using HotChocolate.Subscriptions;
 using HotChocolate.Types;
 
 using back.Data;
@@ -22,8 +17,8 @@ namespace back.Users
     [ExtendObjectType(Name = "Mutation")]
     public class UserMutations
     {
-        public async Task<CreateUserPayload> CreateUser(
-            CreateUserInput input,
+        public async Task<AddUserPayload> AddUserAsync(
+            AddUserInput input,
             [Service] AppDbContext db,
             CancellationToken cancellationToken)
         {
@@ -53,33 +48,37 @@ namespace back.Users
                         .SetCode("PASSWORD_EMPTY").Build());
             }
 
-            string salt = Guid.NewGuid().ToString("N");
-
-            using var sha = SHA512.Create();
-            byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(input.Password + salt));
-
             var user = new User
             {
                 Email = input.Email,
-                PasswordHash = Convert.ToBase64String(hash),
-                Salt = salt,
                 Settings = new UserSettings
                 {
                     MaxReviewsPerDay = 100,
                     NewCardDensity = 0.5f,
                 }
             };
+            user.SetPassword(input.Password);
 
             db.Users.Add(user);
             await db.SaveChangesAsync();
 
-            return new CreateUserPayload(user, input.ClientMutationId);
+            return new AddUserPayload(user, input.ClientMutationId);
+        }
+
+        public async Task<bool> LogoutAsync(
+            [GlobalState]int currentUserId,
+            [Service] AppDbContext db,
+            [Service] CancellationToken cancellationToken)
+        {
+            // TODO, actually revoke the token
+            // in order to do this we need to set up in memory cacheing
+            // and then add the token to it here
+            return true;
         }
 
         public async Task<LoginPayload> LoginAsync(
             LoginInput input,
             [Service] AppDbContext db,
-            [Service] ITopicEventSender eventSender,
             [Service] CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(input.Email))
@@ -113,10 +112,7 @@ namespace back.Users
                         .Build());
             }
 
-            using var sha = SHA512.Create();
-            byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(input.Password + user.Salt));
-
-            if (!Convert.ToBase64String(hash).Equals(user.PasswordHash, StringComparison.Ordinal))
+            if (!user.IsPasswordCorrect(input.Password))
             {
                 throw new QueryException(
                     ErrorBuilder
@@ -126,18 +122,13 @@ namespace back.Users
                         .Build());
             }
 
-            var identity = new ClaimsIdentity(new Claim[]
-            {
-                new Claim(ClaimTypes.Name, user.Email),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(WellKnownClaimTypes.UserId, user.Id.ToString()),
-            });
-
+            var identity = user.GenerateClaims();
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = identity,
                 Expires = DateTime.UtcNow.AddHours(12),
+                IssuedAt = DateTime.UtcNow,
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(Startup.SharedSecret),
                     SecurityAlgorithms.HmacSha256Signature)
@@ -145,7 +136,6 @@ namespace back.Users
 
             SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
             string tokenString = tokenHandler.WriteToken(token);
-
             return new LoginPayload(user, tokenString, "bearer", input.ClientMutationId);
         }
     }

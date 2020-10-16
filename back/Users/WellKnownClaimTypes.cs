@@ -1,4 +1,4 @@
-namespace back.Data 
+namespace back.Users 
 {
     internal static class WellKnownClaimTypes
     {

@@ -3,15 +3,20 @@ using System.Collections.Generic;
 
 namespace back.Common
 {
+    public class PayloadEmpty
+    {
+        public PayloadEmpty() {}
+    }
+
     public class PayloadBase
     {
-        protected PayloadBase(string? clientMutationId)
+        public PayloadBase(string? clientMutationId)
         {
             Errors = Array.Empty<UserError>(); ;
             ClientMutationId = clientMutationId;
         }
 
-        protected PayloadBase(IReadOnlyList<UserError> errors, string? clientMutationId)
+        public PayloadBase(IReadOnlyList<UserError> errors, string? clientMutationId)
         {
             Errors = errors;
             ClientMutationId = clientMutationId;
