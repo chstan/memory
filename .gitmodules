@@ -1,0 +1,4 @@
+[submodule "rich-markdown-editor"]
+    path = front/src/components/rich-markdown-editor
+    url = git://github.com/chstan/rich-markdown-editor.git
+

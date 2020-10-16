@@ -1,12 +1,19 @@
 .vscode
 .idea/
 
+front/src/components/prosemirror/math_node/
+
+**/sandbox_app/instance/
+
 # C# 
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
 *.userprefs
+
+# TS build artifacts
+.next/
 
 # .net build artifacts
 [Dd]ebug/
