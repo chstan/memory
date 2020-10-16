@@ -1,0 +1,5 @@
+query CardDetail($id: Int!) {
+  card(input: { cardId: $id }) {
+    ...CardSnippet
+  }
+}

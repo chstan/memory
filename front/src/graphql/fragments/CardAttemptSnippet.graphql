@@ -1,0 +1,5 @@
+fragment CardAttemptSnippet on CardAttempt {
+    id
+    result,
+    resultText,
+}

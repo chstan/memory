@@ -1,0 +1,7 @@
+mutation ReportAttempt($input: ReportAttemptInput!) {
+    reportAttempt(input: $input) {
+        cardAttempt {
+            ...CardAttemptSnippet
+        }
+    }
+}

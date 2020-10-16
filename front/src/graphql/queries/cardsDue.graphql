@@ -1,0 +1,13 @@
+query CardsDue($first: PaginationAmount) {
+    cardsDue(first: $first) {
+        pageInfo {
+            startCursor
+            endCursor
+            hasNextPage
+            hasPreviousPage
+        }
+        nodes {
+            ...CardSnippet
+        }
+    }
+}

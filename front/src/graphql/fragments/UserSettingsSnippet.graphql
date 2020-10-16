@@ -1,0 +1,4 @@
+fragment UserSettingsSnippet on UserSettings {
+  newCardDensity
+  maxReviewsPerDay
+}

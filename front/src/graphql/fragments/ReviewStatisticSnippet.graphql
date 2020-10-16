@@ -1,0 +1,4 @@
+fragment ReviewStatisticSnippet on ReviewStatistic {
+    correctFraction 
+    reviewCount
+}

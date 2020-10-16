@@ -1,0 +1,7 @@
+mutation UpdateReviewSettings($input: UpdateReviewSettingsInput!) {
+  updateReviewSettings(input: $input) {
+    settings {
+      ...UserSettingsSnippet
+    }
+  }
+}

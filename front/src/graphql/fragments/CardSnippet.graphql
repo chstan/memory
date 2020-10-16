@@ -1,0 +1,22 @@
+fragment CardSnippet on Card {
+    id
+    kind
+    createdAt
+    updatedAt
+    
+    frontText
+    rearText
+    dueAt
+    engine
+
+    __typename
+
+    tags {
+        ...TagSnippet
+    }
+
+    creator {
+        id
+        email
+    }
+}

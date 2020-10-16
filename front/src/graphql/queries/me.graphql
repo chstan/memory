@@ -1,0 +1,12 @@
+query Me {
+    me {
+        id
+        email
+        cardsDueCount
+        katasDueCount
+        settings {
+            maxReviewsPerDay
+            newCardDensity
+        }
+    }
+}

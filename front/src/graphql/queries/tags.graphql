@@ -1,0 +1,13 @@
+query Tags($tagName: String) {
+    tags(where: { name_contains: $tagName}, first: 5 ) {
+        pageInfo {
+            startCursor
+            endCursor
+            hasNextPage
+            hasPreviousPage
+        }
+        nodes {
+            ...TagSnippet
+        }
+    }
+}

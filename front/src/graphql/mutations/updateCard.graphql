@@ -1,0 +1,7 @@
+mutation UpdateCard($input: UpdateCardInput!) {
+    updateCard(input: $input) {
+        card {
+            ...CardSnippet
+        }
+    }
+}

@@ -1,0 +1,7 @@
+mutation AttemptKata($input: AttemptKataInput!) {
+    attemptKata(input: $input) {
+        cardAttempt {
+            ...CardAttemptSnippet
+        }
+    }
+}

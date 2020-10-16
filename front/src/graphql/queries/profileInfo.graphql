@@ -1,0 +1,28 @@
+query ProfileInfo {
+  me {
+    id
+    email
+
+    cardsDueCount
+    katasDueCount
+
+    reviewHistory {
+      today {
+        ...ReviewStatisticSnippet
+      }
+      lastWeek {
+        ...ReviewStatisticSnippet
+      }
+      lastMonth {
+        ...ReviewStatisticSnippet
+      }
+      lastYear {
+        ...ReviewStatisticSnippet
+      }
+    }
+
+    settings {
+      ...UserSettingsSnippet
+    }
+  }
+}
