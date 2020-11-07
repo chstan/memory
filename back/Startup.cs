@@ -26,6 +26,7 @@ using back.Tags;
 using back.Authorization;
 using back.Kata;
 using back.Data;
+using back.Storages;
 using back.Types;
 using HotChocolate.Types;
 using HotChocolate.Execution;
@@ -84,8 +85,10 @@ namespace back
 
             // setup kata server
             services.Configure<KataServiceSettings>(Configuration.GetSection("KataServiceSettings"));
+            services.Configure<BlobServiceSettings>(Configuration.GetSection("BlobServiceSettings"));
             services.Configure<ImportServiceSettings>(Configuration.GetSection("ImportServiceSettings"));
             services.AddSingleton<KataService>();
+            services.AddScoped<BlobService>();
             services.AddScoped<AnkiTextImportService>();
 
             services.AddHttpContextAccessor();
