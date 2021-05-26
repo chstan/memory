@@ -44,7 +44,7 @@ def create_app(**_):
         print(response.headers)
         print(response.get_data())
         return response
-            
+        
     @app.route("/run_kata", methods=["POST"])
     def run_kata():
         try:
@@ -59,7 +59,6 @@ def create_app(**_):
         return asdict(result)
 
     return app
-
 
 class EnumEncoder(JSONEncoder):
     def default(self, o: Any) -> Any:

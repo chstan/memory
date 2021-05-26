@@ -6,7 +6,6 @@ import { Heading, Link, StatGroup, StatLabel, StatNumber } from "@chakra-ui/core
 import KeyboardHint from "../components/KeyboardHint";
 import { KeyboardBoundAction } from "../common/types";
 import { useNavigationAction } from "../utils/hooks";
-import RichMarkdownAddCardForm from "../forms/RichMarkdownAddCardForm";
 
 
 const Dashboard = () => {
@@ -16,9 +15,6 @@ const Dashboard = () => {
     return (
         <div>
             <p>Dashboard</p>
-            <section>
-                <RichMarkdownAddCardForm />
-            </section>
             <section>
                 <div>
                     <StatGroup>

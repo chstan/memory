@@ -7,9 +7,11 @@ import {
   TabList,
   TabPanels,
   FormControl,
+  FormLabel,
 } from "@chakra-ui/core";
 import React, { useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { inferTrueCardTypeFromText } from "../common/cloze";
 import { ENGINE_TO_EDITOR_LANGUAGE } from "../common/constants";
 import { KeyboardBoundAction, SelectOption } from "../common/types";
 import { AddCardInput, CardKind, EvaluationEngine, useAddCardMutation } from "../generated/graphql";
@@ -17,19 +19,13 @@ import { useChord, useChordForAction } from "../utils/hooks";
 import withApollo from "../utils/withApollo";
 import CardTagSelect from "./CardTagSelect";
 import { ValueEditorInput } from "./Editor";
-import { InputField } from "./InputField";
 import KeyboardHint from "./KeyboardHint";
+import { RichMarkdownEditor } from "./RichMarkdown";
 
 type AddCardFormValues = {
   kind: CardKind;
   tags: Array<SelectOption<number | string>>;
 
-  cloze: {
-    frontText: string;
-  };
-  completion: {
-    frontText: string;
-  };
   frontAndBack: {
     frontText: string;
     rearText: string;
@@ -39,9 +35,6 @@ type AddCardFormValues = {
     frontText: string;
   };
 };
-
-const CLOZE_PLACEHOLDER_TEXT = "Use a %cloze tag%1 to hide text.";
-const COMPLETION_PLACEHOLDER_TEXT = "Use a %completion tag%$ to hide text.";
 
 type EnumOptionMapping = Array<[string, string]>;
 
@@ -58,18 +51,10 @@ function addCardFormValuesToInput(values: AddCardFormValues): AddCardInput {
       engine: EvaluationEngine.Localjavascript,
       ...tagFields,
     };
-  } else if (values.kind === CardKind.Completion) {
-    return {
-      kind: values.kind,
-      ...values.completion,
-      engine: EvaluationEngine.Localjavascript,
-      rearText: "",
-      ...tagFields,
-    };
   } else if (values.kind === CardKind.Cloze) {
     return {
       kind: values.kind,
-      ...values.cloze,
+      frontText: values.frontAndBack.frontText,
       engine: EvaluationEngine.Localjavascript,
       rearText: "",
       ...tagFields,
@@ -86,10 +71,8 @@ function addCardFormValuesToInput(values: AddCardFormValues): AddCardInput {
   throw new TypeError(`CardKind value ${values.kind} failed switch`);
 }
 
-const CARD_KIND_OPTIONS: EnumOptionMapping = [
-  [CardKind.Cloze, "Cloze"],
-  [CardKind.Frontandback, "Front + Back"],
-  [CardKind.Completion, "Completion"],
+const CARD_KIND_TAB_OPTIONS: EnumOptionMapping = [
+  [CardKind.Cloze, "Cloze-like"],
   [CardKind.Kata, "Kata"],
 ];
 
@@ -117,12 +100,6 @@ const EngineSelect = selectForEnum(EVALUATION_ENGINE_OPTIONS);
 
 const INITIAL_VALUES: AddCardFormValues = {
   kind: CardKind.Cloze,
-  cloze: {
-    frontText: "",
-  },
-  completion: {
-    frontText: "",
-  },
   frontAndBack: {
     frontText: "",
     rearText: "",
@@ -140,7 +117,8 @@ const QuickAddCard = () => {
   const { register, watch, control, handleSubmit, setValue } = useForm({
     defaultValues: INITIAL_VALUES,
   });
-  const FLAT_KINDS = CARD_KIND_OPTIONS.map(([v, _], __) => v);
+
+  const FLAT_KINDS = CARD_KIND_TAB_OPTIONS.map(([v, _], __) => v);
 
   const submit = async (values: AddCardFormValues) => {
     const builtValues = addCardFormValuesToInput(values);
@@ -166,9 +144,11 @@ const QuickAddCard = () => {
   const watchKind: CardKind = watch("kind") as any;
   const editorLanguage = ENGINE_TO_EDITOR_LANGUAGE[watchEngine || EvaluationEngine.Python];
   const watchAll = watch();
+  const inferredType = inferTrueCardTypeFromText(watchAll.frontAndBack.frontText);
 
   return (
     <form onSubmit={onSubmit}>
+      {JSON.stringify(watchAll)}
       <FormControl>
         <Controller control={control} name="tags" render={CardTagSelect} />
         <input type="hidden" ref={register} name={"kind"} />
@@ -177,7 +157,7 @@ const QuickAddCard = () => {
           onChange={(index) => setValue("kind", FLAT_KINDS[index])}
         >
           <TabList>
-            {CARD_KIND_OPTIONS.map(([_, label], index) => {
+            {CARD_KIND_TAB_OPTIONS.map(([_, label], index) => {
               const l = `${index + 1}`;
               return (
                 <Tab key={index}>
@@ -190,33 +170,20 @@ const QuickAddCard = () => {
           </TabList>
           <TabPanels>
             <TabPanel>
-              <InputField
-                name="cloze.frontText"
-                placeholder={CLOZE_PLACEHOLDER_TEXT}
-                label="Cloze"
-                ref={register}
-              />
-            </TabPanel>
-            <TabPanel>
-              <InputField
+              <span>{inferredType}</span>
+              <FormLabel htmlFor={"frontAndBack.frontText"}>Front Text</FormLabel>
+              <Controller
+                control={control}
+                label="Front Text"
                 name="frontAndBack.frontText"
-                placeholder="Front Text"
-                label="Font Text"
-                ref={register}
+                render={(props) => <RichMarkdownEditor {...props} />}
               />
-              <InputField
+              <FormLabel htmlFor={"frontAndBack.rearText"}>Rear Text</FormLabel>
+              <Controller
+                control={control}
+                label="Notes/Rear Text"
                 name="frontAndBack.rearText"
-                placeholder="Rear Text"
-                label="Rear Text"
-                ref={register}
-              />
-            </TabPanel>
-            <TabPanel>
-              <InputField
-                name="completion.frontText"
-                placeholder={COMPLETION_PLACEHOLDER_TEXT}
-                label="Font Text"
-                ref={register}
+                render={(props) => <RichMarkdownEditor {...props} />}
               />
             </TabPanel>
             <TabPanel>

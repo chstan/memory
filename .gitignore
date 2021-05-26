@@ -1,6 +1,7 @@
 .vscode
 .idea/
 
+tmp/
 front/src/components/prosemirror/math_node/
 fixtures/
 back/dev.db
